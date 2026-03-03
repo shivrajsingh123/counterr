@@ -1,0 +1,113 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #323fd0c2;
+}
+
+/* black screen (centers the digit inside it) */
+.screen {
+  width: 300px;
+  height: 370px;
+  background: #1b1b1b;
+  border-radius: 19px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* the digit drawing area */
+#digit {
+  width: 140px;      /* IMPORTANT: only the digit size, not the full screen */
+  height: 220px;
+  position: relative;
+}
+
+/* segments */
+.segment {
+  position: absolute;
+  background: #2b0000;
+  box-shadow: none;
+  opacity: 0.25;
+  border-radius: 10px;
+}
+
+.segment.on {
+  background: red;
+  box-shadow: 0 0 10px red;
+  opacity: 1;
+}
+
+.segment{
+  transition: opacity 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+.screen{
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+
+
+
+
+
+
+/* segment positions */
+.a { top: 20px; left: 30px; width: 80px; height: 12px; }
+
+.b { top: 32px; left: 110px; width: 12px; height: 70px; }
+.c { top: 112px; left: 110px; width: 12px; height: 70px; }
+
+.d { top: 180px; left: 30px; width: 80px; height: 12px; }
+
+.e { top: 112px; left: 18px; width: 12px; height: 70px; }
+.f { top: 32px;  left: 18px; width: 12px; height: 70px; }
+
+.g { top: 100px; left: 30px; width: 80px; height: 12px; }
+
+
+
+
+.controls{
+  margin-top: 38px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.controls button{
+  padding: 10px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  background: rgba(255,255,255,0.92);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.controls button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+}
+
+.controls button:active{
+  transform: translateY(0px) scale(0.98);
+  box-shadow: none;
+}
+
+
