@@ -14,10 +14,9 @@ function beep(freq = 800, duration = 0.08) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
-  osc.type = "square";        // digital feel
+  osc.type = "square";
   osc.frequency.value = freq;
 
-  // smooth volume envelope
   const t = ctx.currentTime;
   gain.gain.setValueAtTime(0.0001, t);
   gain.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
@@ -42,12 +41,10 @@ const segments = {
 };
 
 function clearDigit() {
-  for (let key in segments) {
-    segments[key].classList.remove("on");
-  }
+  for (let k in segments) segments[k].classList.remove("on");
 }
 
-const map = {
+const numberMap = {
   0: ["a", "b", "c", "d", "e", "f"],
   1: ["b", "c"],
   2: ["a", "b", "g", "e", "d"],
@@ -62,16 +59,74 @@ const map = {
 
 function showNumber(num) {
   clearDigit();
-  map[num].forEach((seg) => segments[seg].classList.add("on"));
+  numberMap[num].forEach((seg) => segments[seg].classList.add("on"));
 }
 
-// ---------------- PULSE ANIMATION ----------------
+// ---------------- ANIMATIONS: Pulse + Scan + Flip ----------------
 const digitEl = document.getElementById("digit");
+const screenEl = document.querySelector(".screen");
 
 function pulse() {
-  digitEl.classList.remove("pulse"); // restart animation
-  void digitEl.offsetWidth;          // force reflow
+  digitEl.classList.remove("pulse");
+  void digitEl.offsetWidth;
   digitEl.classList.add("pulse");
+}
+
+function scanFlip() {
+  // scanline
+  screenEl.classList.remove("scan");
+  void screenEl.offsetWidth;
+  screenEl.classList.add("scan");
+
+  // flip tick
+  digitEl.classList.remove("flip");
+  void digitEl.offsetWidth;
+  digitEl.classList.add("flip");
+}
+
+function feedback(freq) {
+  // helpful for browsers that block audio until click
+  getAudioCtx().resume();
+  scanFlip();
+  pulse();
+  beep(freq);
+}
+
+// ---------------- GF MODE: N E H A (7-seg approximation) ----------------
+// Note: true "N" is not really possible on 7-seg, so this is a stylized "n".
+const letters = {
+  N: ["c", "e", "g"],                 // stylized "n"
+  E: ["a", "f", "g", "e", "d"],
+  H: ["f", "g", "b", "c", "e"],       // H-ish
+  A: ["a", "b", "c", "e", "f", "g"],
+};
+
+function showSegments(list) {
+  clearDigit();
+  list.forEach((seg) => segments[seg].classList.add("on"));
+}
+
+let gfOn = false;
+let gfInterval = null;
+
+function startGFMode() {
+  const seq = ["N", "E", "H", "A"];
+  let i = 0;
+
+  showSegments(letters[seq[i]]);
+  feedback(1050);
+
+  gfInterval = setInterval(() => {
+    i = (i + 1) % seq.length;
+    showSegments(letters[seq[i]]);
+    feedback(850);
+  }, 450);
+}
+
+function stopGFMode() {
+  gfOn = false;
+  clearInterval(gfInterval);
+  gfInterval = null;
 }
 
 // ---------------- COUNTER BUTTONS ----------------
@@ -81,27 +136,41 @@ showNumber(count);
 const incBtn = document.getElementById("inc");
 const decBtn = document.getElementById("dec");
 const resetBtn = document.getElementById("reset");
+const gfBtn = document.getElementById("gf");
 
 incBtn.addEventListener("click", () => {
-  getAudioCtx().resume();   // helps in browsers that block audio until user gesture
+  if (gfOn) stopGFMode();
+
   count = (count + 1) % 10;
   showNumber(count);
-  beep(900);                // higher for +
-  pulse();
+  feedback(900);
 });
 
 decBtn.addEventListener("click", () => {
-  getAudioCtx().resume();
+  if (gfOn) stopGFMode();
+
   count = (count - 1 + 10) % 10;
   showNumber(count);
-  beep(650);                // lower for -
-  pulse();
+  feedback(650);
 });
 
 resetBtn.addEventListener("click", () => {
-  getAudioCtx().resume();
+  if (gfOn) stopGFMode();
+
   count = 0;
   showNumber(count);
-  beep(750);
-  pulse();
+  feedback(750);
+});
+
+gfBtn.addEventListener("click", () => {
+  getAudioCtx().resume();
+
+  if (!gfOn) {
+    gfOn = true;
+    startGFMode();
+  } else {
+    stopGFMode();
+    showNumber(count);
+    feedback(750);
+  }
 });
